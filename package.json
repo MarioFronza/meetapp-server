@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "nodemon src/server.js",
-    "queue": "nodemon src/queue.js"
+    "start": "node src/server.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
