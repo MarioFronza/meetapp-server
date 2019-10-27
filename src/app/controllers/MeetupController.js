@@ -4,6 +4,7 @@ import { isBefore, startOfDay, endOfDay, parseISO } from 'date-fns';
 import { resolveSoa } from 'dns';
 import Meetup from '../models/Meetup';
 import User from '../models/User';
+import File from '../models/File';
 
 class MeetupController {
   async index(req, res) {
@@ -21,7 +22,19 @@ class MeetupController {
 
     const meetups = await Meetup.findAll({
       where,
-      include: [User],
+      attributes: ['id', 'title', 'description', 'date', 'location'],
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['id', 'name'],
+        },
+        {
+          model: File,
+          as: 'image',
+          attributes: ['id', 'url'],
+        },
+      ],
       limit: 10,
       offset: 10 * page - 10,
     });
