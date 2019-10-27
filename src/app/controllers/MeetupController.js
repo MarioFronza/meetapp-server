@@ -32,7 +32,7 @@ class MeetupController {
         {
           model: File,
           as: 'image',
-          attributes: ['id', 'url'],
+          attributes: ['id', 'url', 'path'],
         },
       ],
       limit: 10,
