@@ -9,29 +9,19 @@ class SubscriptionController {
       where: {
         user_id: req.userId,
       },
-      attributes: ['id', 'user_id'],
       include: [
         {
           model: Meetup,
+          required: true,
+          as: 'meetup',
           where: {
             date: {
               [Op.gt]: new Date(),
             },
           },
-          required: true,
-          attributes: [
-            'id',
-            'past',
-            'title',
-            'description',
-            'location',
-            'date',
-            'file_id',
-            'user_id',
-          ],
+          attributes: ['id', 'title', 'description', 'date', 'location'],
         },
       ],
-      order: [[Meetup, 'date']],
     });
 
     return res.json(subscriptions);
@@ -40,10 +30,15 @@ class SubscriptionController {
   async store(req, res) {
     const user = await User.findByPk(req.userId);
     const meetup = await Meetup.findByPk(req.params.meetupId, {
-      include: [User],
+      include: [
+        {
+          model: User,
+          as: 'user',
+        },
+      ],
     });
 
-    if (meetup.user_id === req.userId) {
+    if (meetup.user === req.userId) {
       return res
         .status(400)
         .json({ error: "Cat't subscribe to you own meetups" });
@@ -59,6 +54,7 @@ class SubscriptionController {
         {
           model: Meetup,
           required: true,
+          as: 'meetup',
           where: {
             date: meetup.date,
           },
@@ -72,12 +68,12 @@ class SubscriptionController {
         .json({ error: "Can't subscribe at the same time" });
     }
 
-    const subscription = await Subscription.create({
+    const { id, user_id, meetup_id } = await Subscription.create({
       user_id: user.id,
       meetup_id: meetup.id,
     });
 
-    return res.json(subscription);
+    return res.json(id, user_id, meetup_id);
   }
 }
 

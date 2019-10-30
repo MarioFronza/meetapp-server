@@ -2,6 +2,13 @@ import * as Yup from 'yup';
 import User from '../models/User';
 
 class UserController {
+  async show(req, res) {
+    const user = await User.findByPk(req.userId);
+    if (!user) return res.status(400).json({ error: 'Usuário não encontrado' });
+
+    return res.json(user);
+  }
+
   async store(req, res) {
     const schema = Yup.object().shape({
       name: Yup.string().required(),
