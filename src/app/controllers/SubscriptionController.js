@@ -91,6 +91,13 @@ class SubscriptionController {
 
     return res.json(id, user_id, meetup_id);
   }
+
+  async destroy(req, res) {
+    const { subscriptionId } = req.params;
+    const subscription = await Subscription.findByPk(subscriptionId);
+    await subscription.destroy();
+    return res.send();
+  }
 }
 
 export default new SubscriptionController();
