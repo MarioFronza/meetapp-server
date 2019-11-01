@@ -8,13 +8,12 @@ import File from '../models/File';
 
 class MeetupController {
   async index(req, res) {
-    const page = req.query.page || 1;
     const where = {};
 
     if (req.query.date) {
       const { date } = req.query;
       const searchDate = parseISO(date);
-
+      console.log(date);
       where.date = {
         [Op.between]: [startOfDay(searchDate), endOfDay(searchDate)],
       };
@@ -43,8 +42,6 @@ class MeetupController {
           attributes: ['id', 'url', 'path'],
         },
       ],
-      limit: 10,
-      offset: 10 * page - 10,
     });
 
     return res.json(meetups);

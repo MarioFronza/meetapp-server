@@ -51,8 +51,7 @@ class SubscriptionController {
         },
       ],
     });
-
-    if (meetup.user === req.userId) {
+    if (meetup.user_id === req.userId) {
       return res.status(400).json({
         error: 'Não é possível se inscrever nos seus próprios meetups',
       });
