@@ -2,6 +2,7 @@ import { Op } from 'sequelize';
 import Subscription from '../models/Subscription';
 import Meetup from '../models/Meetup';
 import User from '../models/User';
+import File from '../models/File';
 
 class SubscriptionController {
   async index(req, res) {
@@ -9,6 +10,7 @@ class SubscriptionController {
       where: {
         user_id: req.userId,
       },
+      attributes: ['id'],
       include: [
         {
           model: Meetup,
@@ -20,6 +22,18 @@ class SubscriptionController {
             },
           },
           attributes: ['id', 'title', 'description', 'date', 'location'],
+          include: [
+            {
+              model: User,
+              as: 'user',
+              attributes: ['id', 'name'],
+            },
+            {
+              model: File,
+              as: 'image',
+              attributes: ['id', 'url', 'path'],
+            },
+          ],
         },
       ],
     });
@@ -39,13 +53,15 @@ class SubscriptionController {
     });
 
     if (meetup.user === req.userId) {
-      return res
-        .status(400)
-        .json({ error: "Cat't subscribe to you own meetups" });
+      return res.status(400).json({
+        error: 'Não é possível se inscrever nos seus próprios meetups',
+      });
     }
 
     if (meetup.past) {
-      return res.status(400).json({ error: "Cat't subscribe to past meetups" });
+      return res.status(400).json({
+        error: 'Não é possível se inscrever em meetups que já passaram',
+      });
     }
 
     const checkMeetupDate = await Subscription.findOne({
@@ -63,9 +79,9 @@ class SubscriptionController {
     });
 
     if (checkMeetupDate) {
-      return res
-        .status(400)
-        .json({ error: "Can't subscribe at the same time" });
+      return res.status(400).json({
+        error: 'Não é possível se inscrever duas vezes no mesmo meetup',
+      });
     }
 
     const { id, user_id, meetup_id } = await Subscription.create({
