@@ -138,6 +138,93 @@ describe('User', () => {
     expect(response.status).toBe(400);
   });
 
+  it('should not be able to update user without valid password', async () => {
+    const user = await factory.attrs('User', {
+      password: '123123',
+    });
+
+    await request(app)
+      .post('/users')
+      .send(user);
+
+    const createUserSession = await request(app)
+      .post('/sessions')
+      .send({ email: user.email, password: user.password });
+
+    const { token } = createUserSession.body;
+
+    const newUser = {
+      name: 'User',
+      email: 'email@test.com',
+      oldPassword: '123123',
+    };
+
+    const response = await request(app)
+      .put('/users')
+      .set('Authorization', `Bearer ${token}`)
+      .send(newUser);
+
+    expect(response.status).toBe(400);
+  });
+
+  it('should not be able to update user without valid confirm password', async () => {
+    const user = await factory.attrs('User', {
+      password: '123123',
+    });
+
+    await request(app)
+      .post('/users')
+      .send(user);
+
+    const createUserSession = await request(app)
+      .post('/sessions')
+      .send({ email: user.email, password: user.password });
+
+    const { token } = createUserSession.body;
+
+    const newUser = {
+      name: 'User',
+      email: 'email@test.com',
+      oldPassword: '123123',
+      password: '123456',
+    };
+
+    const response = await request(app)
+      .put('/users')
+      .set('Authorization', `Bearer ${token}`)
+      .send(newUser);
+
+    expect(response.status).toBe(400);
+  });
+
+  it('should not be able to update user with invalid old password', async () => {
+    const user = await factory.attrs('User', {
+      password: '123123',
+    });
+
+    await request(app)
+      .post('/users')
+      .send(user);
+
+    const createUserSession = await request(app)
+      .post('/sessions')
+      .send({ email: user.email, password: user.password });
+
+    const { token } = createUserSession.body;
+
+    const newUser = {
+      oldPassword: '123456',
+      password: '123456',
+      confirmPassword: '123456',
+    };
+
+    const response = await request(app)
+      .put('/users')
+      .set('Authorization', `Bearer ${token}`)
+      .send(newUser);
+    expect(response.status).toBe(401);
+  });
+
   it('should not be able to update user with duplicated e-mail', async () => {
     const otherUser = await factory.attrs('User', {
       email: 'otheruser@email.com',
